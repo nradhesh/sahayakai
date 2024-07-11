@@ -79,6 +79,5 @@ def chatbot():
             print(f"Keywords: {scheme[9]}\n")
     else:
         print("No recommendations found.")
-
 if __name__ == "__main__":
     chatbot()
