@@ -1,7 +1,8 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import psycopg2
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from flask import Flask, request, jsonify
 
 config = {
     'dbname': 'schemes',
@@ -12,6 +13,7 @@ config = {
 }
 
 app = Flask(__name__)
+CORS(app)
 
 def connect_to_db():
     try:
@@ -37,6 +39,7 @@ def fetch_schemes():
 
 def get_recommendations(user_keywords):
     schemes = fetch_schemes()
+
     if schemes is not None:
         scheme_data = [' '.join(map(str, scheme)) for scheme in schemes]
 
@@ -48,6 +51,7 @@ def get_recommendations(user_keywords):
         top_indices = cosine_sim.argsort()[-5:][::-1]
         top_schemes = [schemes[i] for i in top_indices]
 
+        print(f"Recommendations: {top_schemes}")  # Add logging here
         return top_schemes
     else:
         print("No schemes found in the database.")
@@ -57,7 +61,9 @@ def get_recommendations(user_keywords):
 def recommend():
     data = request.json
     user_keywords = data.get('keywords', '')
+    print(f"Received keywords: {user_keywords}")  # Add logging here
     recommendations = get_recommendations(user_keywords)
+    print(f"Sending recommendations: {recommendations}")  # Add logging here
     return jsonify(recommendations)
 
 if __name__ == "__main__":
