@@ -40,10 +40,16 @@ class ChatBot:
         user_vec = np.pad(vec.A,((0,0),(0,nfeatures-len(vec.A[0]))))
         cosine_sim = cosine_similarity(self.embedding, user_vec).flatten()
         top_indices = cosine_sim.argsort()[-5:][::-1]
-        top_schemes = [self.df.iloc[i] for i in top_indices]
+        top_schemes = [self.df.iloc[i][0] for i in top_indices]
 
         return top_schemes
 
+    def getPromt(self):
+        promt = input("Enter promt .")
+        keyword_prompt = f"Extract only keywords from this for making cosine similarity with our database: {promt}. Give only keywords separated by space. Don't explain, don't put hyphen."
+        response = self.model.generate_content(keyword_prompt)
+        keywords = response.text.strip()
+        print(self.get_recommendations([promt]))
 
-startUp()
-print(get_recommendations(["Schemes for women."]))
+ob = ChatBot()
+ob.getPromt()
