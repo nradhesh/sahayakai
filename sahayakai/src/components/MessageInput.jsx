@@ -4,8 +4,10 @@ const MessageInput = ({ onSend }) => {
   const [input, setInput] = useState('');
 
   const handleSend = () => {
-    onSend(input);
-    setInput('');
+    if (input.trim() !== '') {
+      onSend(input);
+      setInput('');
+    }
   };
 
   return (
