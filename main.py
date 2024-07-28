@@ -2,23 +2,48 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import pickle
+import google.generativeai as genai
 
-df = pd.read_csv("VectoredSchemes.csv")
-schemes = []
-def startUp():
-    schemes = np.array()
-    for i in df:
-        row = [int(i) for i in df.iloc[i][-4][1:-1].split(',')]
-        col = [int(i) for i in df.iloc[i][-3][1:-1].split(',')]
-        vec = [int(i) for i in df.iloc[i][-2][1:-1].split(',')]
-        arr = np.zeros(row[0], col[0])
-        for i in range(1,len(row)):
-            arr[row[i]][col[i]] = vec[i]
-        schemes.append(arr)
 
-def get_recommendations(promt_vec):
-    cosine_sim = cosine_similarity(schemes, promt_vec).flatten()
-    top_indices = cosine_sim.argsort()[-5:][::-1]
-    top_schemes = [df.iloc[i] for i in top_indices]
 
-    return top_schemes
+class ChatBot:
+
+    recommendation_examples = [
+        "I need a scholarship for college. I'm a girl and my family doesn't make much money.",
+        "I'm a farmer living in a village. I want to start a small business. What government schemes can help me?",
+        "I'm out of work and need training programs. Are there any government schemes I can use?",
+        "I run a small shop and need some financial support. What grants can I apply for?"
+        ]
+    information_examples = [
+        "What are the eligibility criteria for the XYZ scholarship?",
+        "Can you tell me the benefits of the ABC startup scheme?",
+        "What documents do I need to apply for the DEF financial aid?",
+        "How do I sign up for the GHI job training program?"
+        ]
+
+    def __init__(self):
+        self.df = pd.read_csv("scheme_data.csv")
+        self.embedding = None
+        with open("Vector.pkl", "rb") as f:
+            self.embedding = pickle.load(f)
+            print("Loaded.")
+        genai.configure(api_key="AIzaSyAHZtgC-fHXDveWo0rzAEm4HaMGNAGVyVQ")
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
+    
+
+
+    def get_recommendations(self,promt):
+        vectorizer = TfidfVectorizer(stop_words='english')
+        vec = vectorizer.fit_transform(promt)
+        nfeatures = len(self.embedding.A[0])
+        user_vec = np.pad(vec.A,((0,0),(0,nfeatures-len(vec.A[0]))))
+        cosine_sim = cosine_similarity(self.embedding, user_vec).flatten()
+        top_indices = cosine_sim.argsort()[-5:][::-1]
+        top_schemes = [self.df.iloc[i] for i in top_indices]
+
+        return top_schemes
+
+
+startUp()
+print(get_recommendations(["Schemes for women."]))
