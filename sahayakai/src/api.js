@@ -1,13 +1,11 @@
-import axios from 'axios';
-
-export const fetchRecommendations = async (message) => {
+export const fetchRecommendations = async (keywords) => {
   try {
     const response = await fetch('http://localhost:5000/recommend', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ keywords: message }),
+      body: JSON.stringify({ keywords })
     });
 
     if (!response.ok) {
@@ -15,10 +13,9 @@ export const fetchRecommendations = async (message) => {
     }
 
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (error) {
-    console.error('Error fetching recommendations:', error);
+    console.error("Error fetching recommendations:", error);
     return [];
   }
 };

@@ -1,99 +1,71 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import pandas as pd
-import pickle
-import google.generativeai as genai
-import psycopg2
+import requests
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
-# config = {
-#     'dbname': 'schemes',
-#     'user': 'postgres',
-#     'password': '#Shetty222',
-#     'host': 'localhost',
-#     'port': '5433'
-# }
+import json
+import pandas as pd
+import pickle
 
 app = Flask(__name__)
 CORS(app)
 
-def connect_to_db():
-    # try:
-    #     conn = psycopg2.connect(**config)
-    #     return conn
-    # except psycopg2.Error as e:
-    #     print(f"Error connecting to PostgreSQL database: {e}")
-    global df 
-    df = pd.read_csv("scheme_data.csv")
-    global embedding 
-    embedding = None
-    with open("Vector.pkl", "rb") as f:
-        embedding = pickle.load(f)
-    genai.configure(api_key="AIzaSyAHZtgC-fHXDveWo0rzAEm4HaMGNAGVyVQ")
-    global model 
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    global vectorizer 
-    vectorizer = TfidfVectorizer(stop_words='english')
-    con = df.apply(lambda x:x.to_string(), axis=1)
-    vectorizer.fit(con)
+# Load schemes from the CSV file
+schemes_df = pd.read_csv('schemes_data.csv')
+schemes = schemes_df.to_dict(orient='records')
 
-# def fetch_schemes():
-#     conn = connect_to_db()
-#     if conn is not None:
-#         try:
-#             cur = conn.cursor()
-#             cur.execute("SELECT * FROM schemes")
-#             rows = cur.fetchall()
-#             cur.close()
-#             conn.close()
-#             return rows
-#         except psycopg2.Error as e:
-#             print(f"Error fetching schemes: {e}")
-#     else:
-#         print("Connection to database failed.")
+# Load the vectorizer from the pickle file
+with open('vector.pkl', 'rb') as file:
+    vectorizer = pickle.load(file)
+
+# Extract descriptions for vectorization
+descriptions = schemes_df['description'].tolist()
+
+def translate_keywords(keywords, target_language="en"):
+    """
+    Translate keywords to the target language using an external translation API.
+    For this example, we'll assume the keywords are already in the target language.
+    """
+    # Example translation logic, assuming the keywords are already in English
+    translated_keywords = keywords
+    return translated_keywords
 
 def get_recommendations(user_keywords):
-    # schemes = fetch_schemes()
+    try:
+        # Ensure user_keywords is a list for vectorizer.transform
+        if isinstance(user_keywords, str):
+            user_keywords = [user_keywords]
 
-    # if schemes is not None:
-    #     scheme_data = [' '.join(map(str, scheme)) for scheme in schemes]
-
-    #     vectorizer = TfidfVectorizer(stop_words='english')
-    #     vectors = vectorizer.fit_transform(scheme_data + [user_keywords])
-
-    #     cosine_sim = cosine_similarity(vectors[-1], vectors[:-1]).flatten()
-
-    #     top_indices = cosine_sim.argsort()[-5:][::-1]
-    #     top_schemes = [schemes[i] for i in top_indices]
-
-    #     print(f"Recommendations: {top_schemes}")  # Add logging here
-    #     return top_schemes
-    # else:
-    #     print("No schemes found in the database.")
-    #     return []
-
-    vec = vectorizer.transform(user_keywords)
-    # nfeatures = embedding.shape[1]
-    # Ensure user_vec has the same number of features as self.embedding
-    # if vec.shape[1] < nfeatures:
-    #     user_vec = np.pad(vec.toarray(), ((0, 0), (0, nfeatures - vec.shape[1])), 'constant')
-    # else:
-    user_vec = vec.toarray()
-    cosine_sim = cosine_similarity(embedding, user_vec).flatten()
-    top_indices = cosine_sim.argsort()[-5:][::-1]
-    top_schemes = [df.iloc[i] for i in top_indices]
-
-    return top_schemes
+        # Transform the user keywords into the same vector space as the descriptions
+        vec = vectorizer.transform(user_keywords)
+        # Calculate the cosine similarity between the user keywords and all scheme descriptions
+        similarities = cosine_similarity(vec, vectorizer.transform(descriptions)).flatten()
+        # Get the indices of the top 5 most similar schemes
+        top_indices = similarities.argsort()[-5:][::-1]
+        # Get the corresponding schemes
+        recommendations = [schemes[i] for i in top_indices]
+        return recommendations
+    except Exception as e:
+        print(f"Error in get_recommendations: {e}")
+        return []
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
-    data = request.json
-    user_keywords = data.get('keywords', '')
-    print(f"Received keywords: {user_keywords}")  # Add logging here
-    recommendations = get_recommendations(user_keywords)
-    print(f"Sending recommendations: {recommendations}")  # Add logging here
-    return jsonify(recommendations)
+    try:
+        data = request.json
+        keywords = data.get('keywords', '')
+        print(f"Received keywords: {keywords}")
 
-if __name__ == "__main__":
-    app.run(port=5000)
+        # Translate keywords to English
+        translated_keywords = translate_keywords(keywords)
+        print(f"Translated keywords: {translated_keywords}")
+
+        # Get recommendations
+        recommendations = get_recommendations(translated_keywords)
+        return jsonify({"recommendations": recommendations})
+    except Exception as e:
+        print(f"Error in recommend endpoint: {e}")
+        return jsonify({"error": "An error occurred while processing your request."}), 500
+
+if __name__ == '__main__':
+    app.run(debug=False)

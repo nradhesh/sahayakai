@@ -11,14 +11,19 @@ const App = () => {
 
   const handleSend = async (message) => {
     setMessages([...messages, { text: message, from: 'user' }]);
-    const recs = await fetchRecommendations(message);
-    console.log("Recommendations in App:", recs);  // Debug print
-    setMessages((msgs) => [
-      ...msgs,
-      { text: 'Here are some recommendations for you:', from: 'bot' },
-      ...recs.map((rec) => ({ text: rec[1], from: 'bot' })) // Assuming rec[1] is the scheme description
-    ]);
+    try {
+      const recs = await fetchRecommendations(message);
+      console.log("Recommendations in App:", recs);  // Debug print
+      setMessages((msgs) => [
+        ...msgs,
+        { text: 'Here are some recommendations for you:', from: 'bot' },
+        ...recs.map((rec) => ({ text: rec[1], from: 'bot' })) // Assuming rec[1] is the scheme description
+      ]);
+    } catch (error) {
+      console.error("Error handling send:", error);
+    }
   };
+
   return (
     <div className="app">
       <Header />

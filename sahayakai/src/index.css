@@ -9,17 +9,6 @@ html, body {
   color: white;
 }
 
-.header {
-  background: linear-gradient(to right, #4caf50, #90e986, #23c033); /* Three-color gradient */
-  padding: 8px;
-  text-align: center;
-  height: 10vh;
-  display: flex;
-  border-radius: 10px;
-  /* justify-content: space-between; */
-  align-items: center;
-}
-
 .header-content {
   display: flex;
   justify-content: space-between;
@@ -36,9 +25,9 @@ html, body {
 nav ul {
   list-style: none;
   display: flex;
-  gap: 20px;
+  gap: 30px;
   margin: 0;
-  padding: 0;
+  padding-right: 150px;
 }
 
 nav a {
@@ -52,15 +41,29 @@ nav a:hover {
   text-decoration: underline;
 }
 
-.footer {
-  background: linear-gradient(to right, #4caf50, #53e843, #98fea2); /* Three-color gradient */
-  padding-top: 8px;
+.header {
+  background: linear-gradient(to right, #4caf50, #90e986, #23c033); /* Three-color gradient */
+  padding: 8px;
   text-align: center;
-  height: 50px;
-  border-radius: 10px;
+  height: 10vh;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.footer {
+  background: linear-gradient(to right, #4caf50, #1e7d13, #23c033); /* Three-color gradient */
+  padding: 8px;
+  text-align: center;
+  height: 38px;
   position: fixed;
   bottom: 0;
   width: 100%;
+  left: 0;
 }
 
 .app {
@@ -69,14 +72,17 @@ nav a:hover {
   height: 100vh;
   margin: 0; /* Remove margin */
   padding: 0; /* Remove padding */
+  padding-top: 10vh; /* Adjust padding for header */
+  padding-bottom: 38px; /* Adjust padding for footer */
 }
 
 .chatbot {
   flex: 1;
   display: flex;
+  padding: 1000px;
   flex-direction: column;
   justify-content: space-between;
-  padding: 20px 0; /* Adjust padding */
+  padding: 20px;
   background: #1e1e1e;
   border-radius: 10px;
   margin: 0; /* Remove margin */
@@ -91,7 +97,8 @@ nav a:hover {
   background-color: #2e2e2e;
   position: fixed;
   bottom: 50px; /* Adjust this value based on the footer height */
-  width: 100%;
+  width: calc(100% - 40px); /* Adjusted for padding */
+  left: 20px;
   box-sizing: border-box; /* Ensure padding is included in width */
 }
 
@@ -109,6 +116,7 @@ nav a:hover {
   padding: 10px 20px;
   border-radius: 5px;
   border: none;
+  margin-left: 5px;
   background-color: #4caf50;
   color: white;
   cursor: pointer;
@@ -157,6 +165,7 @@ nav a:hover {
   justify-content: center;
   height: 100%;
   text-align: center;
+
 }
 
 .initial-image {
@@ -173,6 +182,34 @@ nav a:hover {
 }
 
 /* Responsive adjustments */
+@media (max-width: 1024px) {
+  .header, .footer, .message-input {
+    padding: 0 10px;
+  }
+
+  .message-input {
+    width: calc(100% - 20px); /* Adjusted for padding */
+  }
+
+  nav ul {
+    padding-right: 50px;
+    gap: 20px;
+  }
+
+  nav a {
+    font-size: 14px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+
+  .footer {
+    height: 30px;
+    padding: 5px;
+  }
+}
+
 @media (max-width: 768px) {
   .header, .footer {
     height: 10vh;
@@ -196,22 +233,78 @@ nav a:hover {
     width: 100%;
     padding: 10px;
   }
+
+  .message.user {
+    font-size: 24px; /* Adjust text size for smaller screens */
+  }
+
+  nav ul {
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 0;
+  }
+
+  nav a {
+    font-size: 16px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+  }
 }
 
 @media (max-width: 480px) {
   .header, .footer {
-    height: 8vh;
+    height: 10vh;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+
+  nav ul {
+    flex-direction: column;
+    padding-right: 0;
+    gap: 10px;
+  }
+
+  nav a {
+    font-size: 14px;
   }
 
   .footer {
     height: 30px;
+    padding: 5px;
+  }
+
+  .message-input {
+    flex-direction: column;
+    align-items: stretch;
+    bottom: 40px; /* Adjust this value based on the footer height */
+    width: calc(100% - 20px); /* Adjusted for padding */
+    left: 10px;
   }
 
   .message-input input {
-    padding: 8px;
+    margin-right: 0;
+    margin-bottom: 10px;
   }
 
   .message-input button {
-    padding: 8px;
+    width: 20px;
+    padding: 10px;
+  }
+
+  .message-display {
+    margin-bottom: 20px;
+  }
+
+  .message.user {
+    font-size: 20px; /* Adjust text size for smaller screens */
   }
 }
