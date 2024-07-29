@@ -27,29 +27,33 @@ class ChatBot:
         self.embedding = None
         with open("Vector.pkl", "rb") as f:
             self.embedding = pickle.load(f)
-            print("Loaded.")
         genai.configure(api_key="AIzaSyAHZtgC-fHXDveWo0rzAEm4HaMGNAGVyVQ")
         self.model = genai.GenerativeModel('gemini-1.5-flash')
-    
+        self.vectorizer = TfidfVectorizer(stop_words='english')
+        con = self.df.apply(lambda x:x.to_string(), axis=1)
+        self.vectorizer.fit(con)
 
 
     def get_recommendations(self,promt):
-        vectorizer = TfidfVectorizer(stop_words='english')
-        vec = vectorizer.fit_transform(promt)
-        nfeatures = len(self.embedding.A[0])
-        user_vec = np.pad(vec.A,((0,0),(0,nfeatures-len(vec.A[0]))))
+        # Transform prompt using the fitted vectorizer
+        vec = self.vectorizer.transform(promt)
+        nfeatures = self.embedding.shape[1]
+        # Ensure user_vec has the same number of features as self.embedding
+        # if vec.shape[1] < nfeatures:
+        #     user_vec = np.pad(vec.toarray(), ((0, 0), (0, nfeatures - vec.shape[1])), 'constant')
+        # else:
+        user_vec = vec.toarray()
         cosine_sim = cosine_similarity(self.embedding, user_vec).flatten()
         top_indices = cosine_sim.argsort()[-5:][::-1]
-        top_schemes = [self.df.iloc[i][0] for i in top_indices]
+        top_schemes = [self.df.iloc[i]['SchemeName'] for i in top_indices]
 
         return top_schemes
-
     def getPromt(self):
         promt = input("Enter promt .")
         keyword_prompt = f"Extract only keywords from this for making cosine similarity with our database: {promt}. Give only keywords separated by space. Don't explain, don't put hyphen."
         response = self.model.generate_content(keyword_prompt)
         keywords = response.text.strip()
-        print(self.get_recommendations([promt]))
+        print(self.get_recommendations([keywords]))
 
 ob = ChatBot()
 ob.getPromt()
