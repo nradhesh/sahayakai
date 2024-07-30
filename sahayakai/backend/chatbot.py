@@ -11,15 +11,15 @@ app = Flask(__name__)
 CORS(app)
 
 # Load schemes from the CSV file
-schemes_df = pd.read_csv('schemes_data.csv')
-schemes = schemes_df.to_dict(orient='records')
+schemes_df = pd.read_csv("scheme_data.csv")
+schemes = schemes_df.apply(lambda x:x.to_string(), axis=1)
 
 # Load the vectorizer from the pickle file
 with open('vector.pkl', 'rb') as file:
-    vectorizer = pickle.load(file)
+    vectorEmbeddings = pickle.load(file)
+vectorizer = TfidfVectorizer(stop_words='english')
+vectorizer.fit(schemes)
 
-# Extract descriptions for vectorization
-descriptions = schemes_df['description'].tolist()
 
 def translate_keywords(keywords, target_language="en"):
     """
@@ -39,11 +39,12 @@ def get_recommendations(user_keywords):
         # Transform the user keywords into the same vector space as the descriptions
         vec = vectorizer.transform(user_keywords)
         # Calculate the cosine similarity between the user keywords and all scheme descriptions
-        similarities = cosine_similarity(vec, vectorizer.transform(descriptions)).flatten()
+        similarities = cosine_similarity(vec, vectorEmbeddings).flatten()
         # Get the indices of the top 5 most similar schemes
         top_indices = similarities.argsort()[-5:][::-1]
         # Get the corresponding schemes
         recommendations = [schemes[i] for i in top_indices]
+        print(recommendations)
         return recommendations
     except Exception as e:
         print(f"Error in get_recommendations: {e}")
