@@ -57,7 +57,7 @@ def recommend():
 
         recommendations = get_recommendations(translated_keywords)
         print("the recomendations are")
-        print(recommendations)
+        # print(recommendations)
         return jsonify({"recommendations": recommendations})
     except Exception as e:
         print(f"Error in recommend endpoint: {e}")
