@@ -3,7 +3,8 @@
 Sahayak AI is a recommendation system built using React (with Vite) on the frontend and Flask with CORS on the backend. The system recommends government schemes to users based on their input keywords. It uses web scraping techniques to provide real-time information on schemes.
 
 ## Project Images
-![WhatsApp Image 2024-09-26 at 17 14 19_469c11de](https://github.com/user-attachments/assets/cbb65921-738b-4fb4-8105-65c186d96f1e)
+![image](https://github.com/user-attachments/assets/00999542-93be-45b3-a287-a10bfef02208)
+
 ![WhatsApp Image 2024-09-26 at 17 18 43_9f147f85](https://github.com/user-attachments/assets/5c62751c-6c25-4ac7-80a1-0540b640f395)
 
 
